@@ -1,0 +1,132 @@
+
+# Import Packages
+```{r}
+
+# Installs pacman if needed
+if (!require("pacman")) install.packages("pacman")
+
+# load packages
+pacman::p_load(pacman, rio, dplyr, ggplot2, stringr, scales)
+
+```
+
+# Import Dataset
+```{r}
+
+dataset_path <- "./dataset/"
+
+daily_covid <- import(
+    paste0(dataset_path, "worldometer_coronavirus_daily_data.csv"))
+head(daily_covid)
+
+summary_covid <- import(
+    paste0(dataset_path, "worldometer_coronavirus_summary_data.csv"))
+head(summary_covid)
+
+```
+# Data Cleaning
+```{r}
+
+# daily_covid[is.na(d)] <- 0
+
+```
+
+# Data Manipulation and visualization
+```{r}
+
+## global percentage of death, active case and recovered ##
+
+# sum vertically
+categories <- c("total_deaths", "total_recovered", "active_cases")
+category <- str_replace_all(categories, pattern =  "_", replacement = " ")
+category <- str_to_title(category)
+
+data <- 
+    summary_covid[, categories] %>%
+    colSums(na.rm = T)
+data <- data.frame(
+  category=category,
+  count=data
+)
+
+data$prettyCount <- prettyNum(data$count, big.mark = ",", scientific = F)
+
+# Compute percentages
+data$fraction <- data$count / sum(data$count)
+
+# Compute the cumulative percentages (top of each rectangle)
+data$ymax <- cumsum(data$fraction)
+
+# Compute the bottom of each rectangle
+data$ymin <- c(0, head(data$ymax, n=-1))
+
+# Compute label position
+data$labelPosition <- (data$ymax + data$ymin) / 2
+
+# Compute a good label
+# data$label <- paste(data$prettyCount, "\n", data$category)
+
+# Compute display percentages
+data$prettyFraction <- percent(data$fraction)
+
+# Make the plot
+ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
+    geom_rect() +
+    geom_text( 
+        x=4.3, 
+        aes(y=labelPosition, label=prettyCount, color=category, fontface="bold"), 
+        size=3.5
+    ) + # x here controls label position (inner / outer)
+    geom_text(
+        x=3.5, 
+        aes(y=labelPosition, label=prettyFraction, fontface="bold"), 
+        color="white",
+        size=4
+    ) +
+    scale_fill_brewer(palette="Set2") +
+    scale_color_brewer(palette="Set2") +
+    coord_polar(theta="y") +
+    xlim(c(2, 4)) +
+    theme_void() +
+    annotate(
+        geom = "text", 
+        x = 2, 
+        y = 0, 
+        label = paste0(
+            "Total Cases\n", 
+            prettyNum(sum(data$count), big.mark = ",", scientific = F
+            )
+        )
+    )
+    # theme(legend.position = "none")
+
+```
+
+```{r}
+# comparison of cases between different continent, countries
+
+
+# correlation between population and covid cases
+
+
+# overview of accumulated cases vs date for all the country
+
+
+# ranking of cases for the top n countries
+# use tree map
+
+# 
+# 
+# 
+# 
+# 
+```
+
+
+# clean up
+```{r}
+
+pacman::p_unload(all)
+
+```
+
