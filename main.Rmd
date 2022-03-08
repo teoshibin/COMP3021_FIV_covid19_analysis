@@ -6,7 +6,17 @@
 if (!require("pacman")) install.packages("pacman")
 
 # load packages
-pacman::p_load(pacman, rio, dplyr, ggplot2, stringr, scales)
+pacman::p_load(
+    pacman, 
+    rio,       # data importing
+    dplyr,     # data manipulation
+    ggplot2,   # ploting
+    stringr,   # string formatting
+    scales,    # plot scales and color etc. 
+    viridis,   # color palette
+    hrbrthemes,# plot themes
+    plotly     # interactive plot
+    )
 
 ```
 
@@ -32,6 +42,7 @@ head(summary_covid)
 ```
 
 # Data Manipulation and visualization
+## Generic Questions and Answers
 ```{r}
 
 ## global percentage of death, active case and recovered ##
@@ -103,11 +114,12 @@ ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
 ```
 
 ```{r}
-# comparison of cases between different continent, countries
+## comparison of cases between different continent ##
 
 
-# correlation between population and covid cases
+```
 
+```{r}
 
 # overview of accumulated cases vs date for all the country
 
@@ -115,13 +127,50 @@ ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
 # ranking of cases for the top n countries
 # use tree map
 
-# 
-# 
-# 
-# 
-# 
 ```
 
+```{r}
+summary_covid
+```
+
+
+## More in depth Questions
+```{r fig.align="center", fig.width = 12, fig.height = 6}
+# what is the relation between population and covid cases
+
+data <- 
+    select(
+        summary_covid, 
+        total_confirmed, 
+        population, 
+        continent, 
+        total_tests
+    ) %>%
+    arrange(desc(total_tests)) # to prevent big bubble overlapping small ones
+
+p <- 
+    ggplot(
+        data, 
+        aes(x=population, y=total_confirmed, fill=continent, size=total_tests)
+    ) +
+    geom_point(alpha=0.5, shape=21, color="black") +
+    scale_x_log10(
+        labels = unit_format(unit = "M", scale = 1e-6),
+        breaks = 1e+3 * 10^(seq(0,8,2)),
+    ) +
+    scale_y_log10(
+        labels = unit_format(unit = "M", scale = 1e-6),
+        breaks = 10 * 10^(seq(0,8,2)),
+    ) +
+    scale_size(range = c(2, 35), name="Total Tests") +
+    ylab("Covid Cases") +
+    xlab("Population") +
+    coord_cartesian(clip = "off") +
+    theme_ipsum() +
+    scale_fill_viridis(discrete=TRUE, option = "A")
+
+p
+```
 
 # clean up
 ```{r}
