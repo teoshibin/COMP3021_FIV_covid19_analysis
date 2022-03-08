@@ -1,36 +1,63 @@
 
 # Import Packages
-```{r}
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
 
-# Installs pacman if needed
+# Installs pacman package if needed
 if (!require("pacman")) install.packages("pacman")
 
 # load packages
 pacman::p_load(
-    pacman, 
-    rio,       # data importing
-    dplyr,     # data manipulation
-    ggplot2,   # ploting
-    stringr,   # string formatting
-    scales,    # plot scales and color etc. 
-    viridis,   # color palette
-    hrbrthemes,# plot themes
-    plotly     # interactive plot
+    pacman,     # package installer
+    installr,   # software installer
+    rio,        # data importing
+    dplyr,      # data manipulation
+    tidyr,      # data manipulation (gather etc.)
+    ggplot2,    # ploting
+    stringr,    # string formatting
+    scales,     # plot scales and color etc. 
+    viridis,    # color palette
+    hrbrthemes, # plot themes
+    plotly,     # interactive plot
+    treemap,    # tree plot
+    htmlwidgets # save interactive plot into html
     )
+
+# This is needed if packages are giving errors for incompatible binary distribution
+# install.Rtools() 
+
+devtools::install_github("timelyportfolio/d3treeR")
+library(d3treeR) # interactive tree plot
+
+# load custom functions
+source("./functions/general_functions.R")
+
+```
+
+# Specify Paths
+```{r}
+# inputs
+dataset_path <- "./Data/"
+function_path <- "./Functions/"
+
+# outputs
+itrt_plot_path <- "./Output/InteractivePlot/"
+sttc_plot_path <- "./Output/StaticPlot/"
+out_data_path <- "./Output/Data/"
 
 ```
 
 # Import Dataset
 ```{r}
 
-dataset_path <- "./dataset/"
-
 daily_covid <- import(
-    paste0(dataset_path, "worldometer_coronavirus_daily_data.csv"))
-head(daily_covid)
+    paste0(dataset_path, "worldometer_coronavirus_daily_data.csv")
+    )
 
 summary_covid <- import(
-    paste0(dataset_path, "worldometer_coronavirus_summary_data.csv"))
+    paste0(dataset_path, "worldometer_coronavirus_summary_data.csv")
+    )
+
+head(daily_covid)
 head(summary_covid)
 
 ```
@@ -43,6 +70,8 @@ head(summary_covid)
 
 # Data Manipulation and visualization
 ## Generic Questions and Answers
+### Question 1 
+What is the overview of covid cases during that period of time?
 ```{r}
 
 ## global percentage of death, active case and recovered ##
@@ -74,14 +103,12 @@ data$ymin <- c(0, head(data$ymax, n=-1))
 # Compute label position
 data$labelPosition <- (data$ymax + data$ymin) / 2
 
-# Compute a good label
-# data$label <- paste(data$prettyCount, "\n", data$category)
-
 # Compute display percentages
 data$prettyFraction <- percent(data$fraction)
 
 # Make the plot
-ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
+q1 <- 
+    ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
     geom_rect() +
     geom_text( 
         x=4.3, 
@@ -103,74 +130,152 @@ ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
         geom = "text", 
         x = 2, 
         y = 0, 
+        colour = "#eba834",
         label = paste0(
             "Total Cases\n", 
-            prettyNum(sum(data$count), big.mark = ",", scientific = F
-            )
+            prettyNum(sum(data$count), big.mark = ",", scientific = F)
         )
     )
-    # theme(legend.position = "none")
+
+ggsave(paste0(sttc_plot_path, "q1_pie.png"))
+q1
 
 ```
 
+### Question 2
+What are the general scale of cases within different continent or country?
 ```{r}
 ## comparison of cases between different continent ##
 
+q2 <- 
+    summary_covid %>% # data
+    select(country:active_cases) %>%
+    group_by(continent) %>% # group_by 
+    filter(total_confirmed > quantile(total_confirmed, 0.7)) %>% # removing small cases
+    ungroup() %>% 
+    group_by(continent, country) %>% 
+    # turning 3 columes into sub sub group (wide to long conversion)
+    gather(category, count, total_recovered, active_cases, total_deaths, factor_key=T) %>% 
+    ungroup() %>% 
+    mutate(category = factor(category, labels = c("Recovered", "Active Cases", "Deaths"))) %>% 
+    treemap( index=c("continent","country","category"),
+             vSize="count",
+             type="index",
+             palette = "Set2",
+             title = "Group by continent top 70 percentile confirmed cases",
+             align.labels=list(
+                 c("center", "center"),
+                 c("left", "top"),
+                 c("left", "bottom")
+             )
+        )
+
+itrt_q2 <- d3tree2( q2 ,  rootname = "Group by continent top 70 percentile confirmed cases" )
+
+saveWidget(itrt_q2, file = paste0(itrt_plot_path, "q2"))
+itrt_q2
 
 ```
+
+### Question 3
+What is the spreading trend in that period of time?
 
 ```{r}
 
 # overview of accumulated cases vs date for all the country
-
-
-# ranking of cases for the top n countries
-# use tree map
+# 
 
 ```
 
+### Question 4
+Which country has the most cases?
+
 ```{r}
-summary_covid
+
+# ranking of cases for the top n countries
+# hist
+
+```
+
+## Question 5
+How active cases have change during that period of time for each country?
+```{r}
+# video hist
 ```
 
 
 ## More in depth Questions
+### Question 1
+We can easily tell from previous plots that most of the cases are from big countries. 
+What is the relation between population and Covid cases?
 ```{r fig.align="center", fig.width = 12, fig.height = 6}
-# what is the relation between population and covid cases
 
-data <- 
-    select(
-        summary_covid, 
-        total_confirmed, 
-        population, 
-        continent, 
-        total_tests
-    ) %>%
-    arrange(desc(total_tests)) # to prevent big bubble overlapping small ones
+# we can easily tell from previous plots that most of the cases are from big
+# countries. Now, I'm curious about the relation between population & Covid cases
 
-p <- 
-    ggplot(
-        data, 
-        aes(x=population, y=total_confirmed, fill=continent, size=total_tests)
+q11 <- summary_covid %>%
+    
+    # Reorder countries to having big bubbles at the back
+    arrange(desc(population)) %>%
+    
+    # prepare text for tooltip
+    mutate(text = 
+               paste0(
+                   "Country: ", country, 
+                   "\nPopulation: ", commaNum(population), 
+                   "\nTotal Cases:\t", commaNum(total_confirmed), 
+                   "\nTotal Tests\t", commaNum(total_tests)
+               )
+           ) %>%
+    
+    ggplot( 
+        aes(
+            x = population, 
+            y = total_confirmed, 
+            fill = continent, 
+            size = total_tests, 
+            text = text
+        )
     ) +
-    geom_point(alpha=0.5, shape=21, color="black") +
+    geom_point(alpha=0.5, color = "black", shape = 21, na.rm = T) +
     scale_x_log10(
         labels = unit_format(unit = "M", scale = 1e-6),
-        breaks = 1e+3 * 10^(seq(0,8,2)),
+        breaks = 1e+3 * 10^(seq(0,20,2)),
     ) +
     scale_y_log10(
         labels = unit_format(unit = "M", scale = 1e-6),
-        breaks = 10 * 10^(seq(0,8,2)),
+        breaks = 10^(seq(1,21,2)),
     ) +
-    scale_size(range = c(2, 35), name="Total Tests") +
-    ylab("Covid Cases") +
-    xlab("Population") +
+    scale_size(range = c(2, 25), name="Total Tests (M), Size") +
+    labs(fill = 'Continent, Color') +
+    scale_fill_viridis(discrete=T, option = "D") +
     coord_cartesian(clip = "off") +
-    theme_ipsum() +
-    scale_fill_viridis(discrete=TRUE, option = "A")
+    ylab("Covid Cases (M), log10(n)") +
+    xlab("Population (M), log10(n)") +
+    theme_bw()
 
-p
+ggsave(paste0(sttc_plot_path, "q11_bubble.png"))
+
+# turn interactive ggplot with plotly and save it
+itrt_q11 <- ggplotly(q11, tooltip="text")
+saveWidget(itrt_q11, file = paste0(itrt_plot_path, "q11"))
+
+q11
+itrt_q11
+
 ```
+### Question 2
+Which country did well in this pandemic war?
+```{r}
+
+```
+
+### Question 3
+can weather, geometric position affect the spread of covid?
+
+### Question 4
+an even more in depth question, we've seen that population definitely affect how
+covid spread, let's check and see why social distancing is needed.
 
 # clean up
 ```{r}
