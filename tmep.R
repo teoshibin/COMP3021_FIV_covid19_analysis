@@ -1,34 +1,29 @@
+library(dplyr)
+library(babynames)
+library(viridis)
+library(hrbrthemes)
+library(plotly)
 
-devtools::install_github("timelyportfolio/d3treeR")
+# Load dataset from github
+data <- babynames %>% 
+    filter(name %in% c("Ashley", "Amanda", "Jessica",    "Patricia", "Linda", "Deborah",   "Dorothy", "Betty", "Helen")) %>%
+    filter(sex=="F")
+data
+# Plot
+p <- data %>% 
+    ggplot( aes(x=year, y=n, fill=name, text=name)) +
+    geom_area( ) +
+    scale_fill_viridis(discrete = TRUE) +
+    theme(legend.position="none") +
+    ggtitle("Popularity of American names in the previous 30 years") +
+    theme_ipsum() +
+    theme_bw()+
+    theme(legend.position="none")
 
-# library
-library(treemap)
-library(d3treeR)
-
-# dataset
-group <- c(rep("group-1",4),rep("group-2",2),rep("group-3",3))
-subgroup <- paste("subgroup" , c(1,2,3,4,1,2,1,2,3), sep="-")
-value <- c(13,5,22,12,11,7,3,1,23)
-data <- data.frame(group,subgroup,value)
-
-# basic treemap
-p <- treemap(data,
-             index=c("group","subgroup"),
-             vSize="value",
-             type="index",
-             palette = "Set2",
-             bg.labels=c("white"),
-             align.labels=list(
-                 c("center", "center"), 
-                 c("right", "bottom")
-             )  
-)            
+# Turn it interactive
+p <- ggplotly(p, tooltip="text")
 p
-
-# make it interactive ("rootname" becomes the title of the plot):
-inter <- d3tree2( p ,  rootname = "General" )
-inter
 
 # save the widget
 # library(htmlwidgets)
-# saveWidget(inter, file=paste0( getwd(), "/HtmlWidget/interactiveTreemap.html"))
+# saveWidget(p, file=paste0( getwd(), "/HtmlWidget/ggplotlyStackedareachart.html"))

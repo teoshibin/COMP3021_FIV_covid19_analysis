@@ -64,14 +64,24 @@ head(summary_covid)
 # Data Cleaning
 ```{r}
 
-# daily_covid[is.na(d)] <- 0
+daily_covid <-
+    daily_covid %>%
+    replace(is.na(.), 0) %>% 
+    mutate(date = as.Date(date))
 
+
+
+(x <- subset(daily_covid, is.na(cumulative_total_deaths)) %>% group_by(country) %>% summarise(n=length(country)) %>% select(country))
+
+(y <- pull(x, country))
+
+(subset(daily_covid, country == y))
 ```
 
 # Data Manipulation and visualization
 ## Generic Questions and Answers
 ### Question 1 
-What is the overview of covid cases during that period of time?
+What is the overview of covid cases?
 ```{r}
 
 ## global percentage of death, active case and recovered ##
@@ -137,13 +147,13 @@ q1 <-
         )
     )
 
-ggsave(paste0(sttc_plot_path, "q1_pie.png"))
+ggsave(paste0(sttc_plot_path, "qa1_cases_proportion.png"))
 q1
 
 ```
 
 ### Question 2
-What are the general scale of cases within different continent or country?
+What is the scale of infected population in different continent or country?
 ```{r}
 ## comparison of cases between different continent ##
 
@@ -171,21 +181,81 @@ q2 <-
         )
 
 itrt_q2 <- d3tree2( q2 ,  rootname = "Group by continent top 70 percentile confirmed cases" )
+saveWidget(itrt_q2, file = paste0(itrt_plot_path, "qa2_infection_scale.html"))
 
-saveWidget(itrt_q2, file = paste0(itrt_plot_path, "q2"))
 itrt_q2
 
 ```
 
 ### Question 3
-What is the spreading trend in that period of time?
+How many people suffered from covid?
 
-```{r}
+```{r, warning=FALSE}
 
 # overview of accumulated cases vs date for all the country
-# 
+
+# global stacked area plot
+data <- 
+    
+    # group by summation
+    daily_covid %>% 
+    group_by(date) %>% 
+    summarise(
+        cumulative_total_cases = sum(cumulative_total_cases, na.rm = T),
+        cumulative_total_deaths = sum(cumulative_total_deaths, na.rm = T),
+    ) %>% 
+    
+    # convert wide columns to long rows
+    gather(categories, count,
+           cumulative_total_cases, cumulative_total_deaths) %>% 
+    
+    # 
+    rowwise() %>% 
+    mutate(text = 
+               paste(
+                   last(strsplit(categories, "_")[[1]]),
+                   "Count:", comma(count),
+                   "\nDate:", as.Date(date, format = "%d %b %Y")
+               )
+    ) %>% 
+    arrange(date) # this is just to check if text is appended properly
+
+write.csv(data, paste0(out_data_path, "qa3_cumulative_cases_by_date.csv"))
+
+facet_labels <- c(
+    'cumulative_total_cases'="Cumulative Cases",
+    'cumulative_total_deaths'="Cumulative Deaths"
+)
+
+q3 <-          # I can't use any function in the text argument \|/
+    ggplot(data, aes(x=date, y=count, group=categories, fill=categories, text = text)) +
+    geom_area(alpha=0.8 , size=0.5, color="black") +
+    facet_wrap(~categories, scales = "free_y",  labeller = as_labeller(facet_labels)) +
+    scale_fill_viridis(discrete = T, option="B", begin = 0.3, end = 0.7) +
+    scale_x_date(date_labels = "%b %Y") +
+    scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+    theme(legend.position="none") +
+    ggtitle("Cumulative Covid Cases") +
+    ylab("Covid Cases") +
+    xlab("Date") +
+    theme_ipsum() +
+    theme(legend.position="none", axis.text.x = element_text(angle=45, hjust = 1))
+
+ggsave(paste0(sttc_plot_path, "qa3_cumulative_cases_by_date.png"))
+
+itrt_q3 <- ggplotly(q3, tooltip = "text")
+saveWidget(itrt_q3, file = paste0(itrt_plot_path, "qa3_cumulative_cases_by_date.html"))
+
+q3
+itrt_q3
 
 ```
+```{r}
+# top n countries stacked plot 
+
+
+```
+
 
 ### Question 4
 Which country has the most cases?
@@ -207,7 +277,7 @@ How active cases have change during that period of time for each country?
 ## More in depth Questions
 ### Question 1
 We can easily tell from previous plots that most of the cases are from big countries. 
-What is the relation between population and Covid cases?
+Is there any relation between population and Covid cases?
 ```{r fig.align="center", fig.width = 12, fig.height = 6}
 
 # we can easily tell from previous plots that most of the cases are from big
@@ -222,9 +292,9 @@ q11 <- summary_covid %>%
     mutate(text = 
                paste0(
                    "Country: ", country, 
-                   "\nPopulation: ", commaNum(population), 
-                   "\nTotal Cases:\t", commaNum(total_confirmed), 
-                   "\nTotal Tests\t", commaNum(total_tests)
+                   "\nPopulation: ", comma(population), 
+                   "\nTotal Cases:\t", comma(total_confirmed), 
+                   "\nTotal Tests\t", comma(total_tests)
                )
            ) %>%
     
@@ -253,12 +323,11 @@ q11 <- summary_covid %>%
     ylab("Covid Cases (M), log10(n)") +
     xlab("Population (M), log10(n)") +
     theme_bw()
-
-ggsave(paste0(sttc_plot_path, "q11_bubble.png"))
+ggsave(paste0(sttc_plot_path, "qb1_infection_population.png"))
 
 # turn interactive ggplot with plotly and save it
 itrt_q11 <- ggplotly(q11, tooltip="text")
-saveWidget(itrt_q11, file = paste0(itrt_plot_path, "q11"))
+saveWidget(itrt_q11, file = paste0(itrt_plot_path, "qb1_infection_population.html"))
 
 q11
 itrt_q11
@@ -277,10 +346,13 @@ can weather, geometric position affect the spread of covid?
 an even more in depth question, we've seen that population definitely affect how
 covid spread, let's check and see why social distancing is needed.
 
+### Question 5
+How did the R rate behave starting from the beginning of covid?
+
 # clean up
 ```{r}
 
-pacman::p_unload(all)
+# pacman::p_unload(all)
 
 ```
 
