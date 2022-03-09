@@ -26,6 +26,9 @@
     - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
 10. 
     - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
-    
+## Complete R Implementation
+- [R markdown HTML](./main.html) - [preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/main.html)
+- [R mardown PDF](#)
+
 ## Preview GitHub HTML
 Click the preview link to preview html files, alternatively manually paste the url of the html file into this [website](https://htmlpreview.github.io/).
