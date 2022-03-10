@@ -69,13 +69,6 @@ daily_covid <-
     replace(is.na(.), 0) %>% 
     mutate(date = as.Date(date))
 
-
-
-(x <- subset(daily_covid, is.na(cumulative_total_deaths)) %>% group_by(country) %>% summarise(n=length(country)) %>% select(country))
-
-(y <- pull(x, country))
-
-(subset(daily_covid, country == y))
 ```
 
 # Data Manipulation and visualization
@@ -213,7 +206,7 @@ data <-
     rowwise() %>% 
     mutate(text = 
                paste(
-                   last(strsplit(categories, "_")[[1]]),
+                   str_to_title(last(strsplit(categories, "_")[[1]])),
                    "Count:", comma(count),
                    "\nDate:", as.Date(date, format = "%d %b %Y")
                )
