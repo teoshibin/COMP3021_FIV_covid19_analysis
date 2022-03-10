@@ -1,10 +1,9 @@
 
-# library(tidyverse)
 library(ggplot2)
 library(dplyr)
-# library(maps)
-library(gganimate)
-library(lubridate)
+library(maps)
+library(gifski)
+library(gtools)
 
 # data
 world <- map_data("world")
@@ -17,6 +16,7 @@ len_date_seq <- length(date_seq)
 max_active_cases <- max(daily_covid$active_cases)
 min_active_cases <- min(daily_covid$active_cases)
 
+# generate active cases world map images
 for (i in c(1:len_date_seq)) {
     
     current_date <- as.Date(date_seq[i])
@@ -62,16 +62,23 @@ for (i in c(1:len_date_seq)) {
             panel.grid.minor.y = element_blank()
         )
     
+    # save plot
     suppressMessages(ggsave(
         plot = map,
         filename = paste0(itrt_plot_path, "/qa5_map/", i,".png")
     ))
     
+    # print log
     if ((i %% print_frequrency) == 0) {
         print(paste(i, "/", len_date_seq))
     }
     
 }
 
-
+# load png paths and convert it into gif
+png_files <- list.files(paste0(itrt_plot_path, "qa5_map/"), 
+                        pattern = ".*png$", full.names = TRUE)
+png_files <- mixedsort(sort(png_files))
+gifski(png_files, gif_file = paste0(itrt_plot_path, "qa5_map_08fps.gif"), 
+       width = 1920, height = 1065, delay = 0.125)
 
