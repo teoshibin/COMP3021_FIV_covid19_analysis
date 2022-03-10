@@ -1,5 +1,8 @@
 # Covid 19 Data Visualization and Analysis
 
+## Example
+![](./Output/InteractivePlot/qa5_map_08fps.gif)
+
 ## Dataset
 - [Covid-19 Global Dataset](https://www.kaggle.com/josephassaker/covid19-global-dataset)
 
@@ -13,8 +16,8 @@
     - [Interactive area plot HTML](./Output/InteractivePlot/qa3_cumulative_cases_by_date.html) -  [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/InteractivePlot/qa3_cumulative_cases_by_date.html)
 4. 
     - [temp](./Output/StaticPlot/qa4_cases_proportion.png)
-5. 
-    - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
+5. How did the number of active cases evolve starting from the beginning?
+    - [Active Cases World Map GIF](./Output/InteractivePlot/qa5_map_08fps.gif)
 6. Is there any relation between population and Covid cases?
     - [Relation bubble plot](./Output/StaticPlot/qa5_cases_proportion.png)
     - [Interactive bubble plot HTML](./Output/InteractivePlot/qb1_infection_population.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/InteractivePlot/qb1_infection_population.html)
