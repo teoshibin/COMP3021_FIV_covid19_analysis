@@ -3,7 +3,9 @@
 Starting from importing packages until data cleaning is essential.
 Remaining code blocks are independent of each other, can be ran individually.
 
-# Import Packages
+# Mandatory Setup
+
+## Import Packages
 
 ```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
 
@@ -38,37 +40,38 @@ source("./functions/general_functions.R")
 
 ```
 
-# Specify Paths
+## Specify Paths
 
 ```{r}
 # inputs
-dataset_path <- "./Data/"
+in_data_path <- "./Data/"
 function_path <- "./Functions/"
 
 # outputs
-itrt_plot_path <- "./Output/InteractivePlot/"
-sttc_plot_path <- "./Output/StaticPlot/"
+html_plot_path <- "./Output/HTML/"
+png_plot_path <- "./Output/PNG/"
+gif_plot_path <- "./Output/GIF/"
 out_data_path <- "./Output/Data/"
 
 ```
 
-# Import Dataset
+## Import Dataset
 
 ```{r}
 
 daily_covid <- import(
-    paste0(dataset_path, "worldometer_coronavirus_daily_data.csv")
+    paste0(in_data_path, "worldometer_coronavirus_daily_data.csv")
     )
 
 summary_covid <- import(
-    paste0(dataset_path, "worldometer_coronavirus_summary_data.csv")
+    paste0(in_data_path, "worldometer_coronavirus_summary_data.csv")
     )
 
 head(daily_covid)
 head(summary_covid)
 
 ```
-# Data Cleaning
+## Data Cleaning
 
 ```{r}
 
@@ -83,9 +86,7 @@ daily_covid <-
 
 ## Generic Questions and Answers
 
-### Question 1 
-
-What is the overview of covid cases?
+1. What is the overview of covid cases?
 
 ```{r}
 
@@ -122,7 +123,7 @@ data$labelPosition <- (data$ymax + data$ymin) / 2
 data$prettyFraction <- percent(data$fraction)
 
 # Make the plot
-q1 <- 
+p <- 
     ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
     geom_rect() +
     geom_text( 
@@ -155,19 +156,22 @@ q1 <-
         plot.background = element_rect(fill='white', color="white")
     )
 
-ggsave(paste0(sttc_plot_path, "qa1_cases_proportion.png"), width = 1920, height=1080 , units = "px")
-q1
+ggsave(paste0(png_plot_path, "qa1.png"), width = 1920, height=1080 , units = "px")
+
+p
+
+# clean up memory
+rm(categories, category, data, p)
+invisible(gc())
 
 ```
 
-### Question 2
-
-What is the scale of infected population in different continent or country?
+2. What is the scale of infected population in different continent or country?
 
 ```{r}
 ## comparison of cases between different continent ##
 
-q2 <- 
+p <- 
     summary_covid %>% # data
     select(country:active_cases) %>%
     group_by(continent) %>% # group_by 
@@ -190,18 +194,20 @@ q2 <-
              )
         )
 
-itrt_q2 <- d3tree2( q2 ,  rootname = "Group by continent top 70 percentile confirmed cases" )
-saveWidget(itrt_q2, file = paste0(itrt_plot_path, "qa2_infection_scale.html"))
+itrt_p <- d3tree2( p ,  rootname = "Group by continent top 70 percentile confirmed cases" )
+saveWidget(itrt_p, file = paste0(html_plot_path, "qa2.html"))
 
-itrt_q2
+itrt_p
+
+# clean up memory
+rm(p, itrt_p)
+invisible(gc())
 
 ```
 
-### Question 3
+3. How many people suffered from covid?
 
-How many people suffered from covid?
-
-```{r, warning=FALSE, width = 1920, height=1080 , units = "px"}
+```{r, warning=FALSE}
 
 # overview of accumulated cases vs date for all the country
 
@@ -231,14 +237,14 @@ data <-
     ) %>% 
     arrange(date) # this is just to check if text is appended properly
 
-write.csv(data, paste0(out_data_path, "qa3_cumulative_cases_by_date.csv"))
+# write.csv(data, paste0(out_data_path, "qa3.csv"))
 
 facet_labels <- c(
     'cumulative_total_cases'="Cumulative Cases",
     'cumulative_total_deaths'="Cumulative Deaths"
 )
 
-q3 <-          # I can't use any function in the text argument \|/
+p <-          # I can't use any function in the text argument \|/
     ggplot(data, aes(x=date, y=count, group=categories, fill=categories, text = text)) +
     geom_area(alpha=0.8 , size=0.5, color="black") +
     facet_wrap(~categories, scales = "free_y",  labeller = as_labeller(facet_labels)) +
@@ -255,32 +261,45 @@ q3 <-          # I can't use any function in the text argument \|/
         plot.background = element_rect(fill='white', color="white"),
     )
 
-ggsave(paste0(sttc_plot_path, "qa3_cumulative_cases_by_date.png"), width = 1920, height=1080 , units = "px")
+ggsave(paste0(png_plot_path, "qa3.png"), width = 1920, height=1080 , units = "px")
 
-itrt_q3 <- ggplotly(q3, tooltip = "text")
-saveWidget(itrt_q3, file = paste0(itrt_plot_path, "qa3_cumulative_cases_by_date.html"))
+itrt_p <- ggplotly(p, tooltip = "text")
+saveWidget(itrt_p, file = paste0(html_plot_path, "qa3.html"))
 
-q3
-itrt_q3
+itrt_p
+p
+
+# clean up memory
+rm(data, facet_labels, p, itrt_p)
+invisible(gc())
 
 ```
 
-### Question 4
-
-Which country has the most cases?
+4. Which country has the most active cases?
 
 ```{r}
 
 # ranking of cases for the top n countries
-# hist
+# data <- 
+#     daily_covid %>% 
+#     group_by(date) %>% # The * 1 makes it possible to have non-integer ranks while sliding
+#     mutate(
+#         rank = rank(-value),
+#         Value_rel = value/value[rank==1],
+#         Value_lbl = paste0(" ",round(value/1e9)))
+#     # group_by(country_name) %>%
+#     # filter(rank <=10) %>%
+#     # ungroup()
+# data
+
+
+# rm(data)
 
 ```
 
-## Question 5
+5. How did the number of active cases evolve starting from the beginning?
 
-How did the number of active cases evolve starting from the beginning?
-
-```{r, eval=FALSE}
+```{r, eval=FALSE, warning=FALSE}
 # ALERT !!! THIS SECTION CREATES GIF PLOTS, IT REQUIRE ROUGHLY 5 MINUTES TO RUN
 # This block of code is disabled, remove eval=F to evaluate
 # 100 MB of images will be generated during the process
@@ -304,8 +323,15 @@ len_date_seq <- length(date_seq)
 max_active_cases <- max(daily_covid$active_cases)
 min_active_cases <- min(daily_covid$active_cases)
 
+# output settings
+gif_name <- "qa5_map"
+gif_frame_folder <- paste0(gif_plot_path, gif_name,"/")
+if (!file.exists(gif_frame_folder)) {
+ dir.create(gif_frame_folder)
+}
+
 # generate active cases world map images
-for (i in c(1:1)) {
+for (i in c(1:len_date_seq)) {
     
     current_date <- as.Date(date_seq[i])
     date_daily_covid <- filter(daily_covid, date == current_date)
@@ -352,7 +378,7 @@ for (i in c(1:1)) {
     # save plot
     suppressMessages(ggsave(
         plot = map,
-        filename = paste0(itrt_plot_path, "/qa5_map/", i,".png"),
+        filename = paste0(gif_frame_folder, i,".png"),
         width = 2940, height=1632 , units = "px"
     ))
     
@@ -362,38 +388,42 @@ for (i in c(1:1)) {
     }
     
 }
-```
 
-```{r, eval=FALSE}
 # load png paths and convert it into gif
-png_files <- list.files(paste0(itrt_plot_path, "qa5_map/"), 
-                        pattern = ".*png$", full.names = TRUE)
+png_files <- list.files(gif_frame_folder, pattern = ".*png$", full.names = TRUE)
 png_files <- mixedsort(sort(png_files))
-gifski(png_files, gif_file = paste0(itrt_plot_path, "qa5_map_08fps.gif"), 
+gifski(png_files, gif_file = paste0(gif_plot_path, gif_name,".gif"), 
        width = 1920, height = 1065, delay = 0.125)
 
+# clean up
 pacman::p_unload(maps,gifski,gtools)
 
+# remove variables as they are too memory intensive
+rm(world, date_seq, print_frequrency, len_date_seq, max_active_cases, 
+   min_active_cases, current_date, date_daily_covid, mapdata, map,
+   gif_name, gif_frame_folder, png_files, i)
+invisible(gc())
+
 ```
+
 Generated Images   
 715 images located in `./Output/InteractivePlot/qa5_map/`   
 
 Generated GIF   
-![](./Output/InteractivePlot/qa5_map_08fps.gif)   
+![](./Output/GIF/qa5_map.gif)   
 
 ## More in depth Questions
 
-### Question 1
+1. Is there any relation between population and Covid cases?
 
-We can easily tell from previous plots that most of the cases are from big countries. 
-Is there any relation between population and Covid cases?
+This is derived from previous histogram plot, as I notice that most of the cases are from big countries. 
 
-```{r fig.align="center", fig.width = 32, fig.height = 18}
+```{r fig.align="center", fig.width = 12, fig.height = 7, eval=TRUE}
 
 # we can easily tell from previous plots that most of the cases are from big
 # countries. Now, I'm curious about the relation between population & Covid cases
 
-qb1 <- summary_covid %>%
+p <- summary_covid %>%
     
     # Reorder countries to having big bubbles at the back
     arrange(desc(population)) %>%
@@ -433,37 +463,33 @@ qb1 <- summary_covid %>%
     ylab("Covid Cases (M), log10(n)") +
     xlab("Population (M), log10(n)") +
     theme_bw()
-ggsave(paste0(sttc_plot_path, "qb1_infection_population.png"), width = 3840, height=2160, units = "px")
+ggsave(paste0(png_plot_path, "qb1.png"), width = 3840, height=2160, units = "px")
 
 # turn interactive ggplot with plotly and save it
-itrt_qb1 <- ggplotly(qb1, tooltip="text")
-saveWidget(itrt_q11, file = paste0(itrt_plot_path, "qb1_infection_population.html"))
+itrt_p <- ggplotly(p, tooltip="text")
+saveWidget(itrt_p, file = paste0(html_plot_path, "qb1.html"))
 
-qb1
-itrt_qb1
+itrt_p
+p
+
+rm(p, itrt_p)
+invisible(gc())
 
 ```
 
-### Question 2
-
-Which country did well in this pandemic war?
+2. Which country did well in this pandemic war?
 
 ```{r}
 
 ```
 
-### Question 3
-
-can weather, geometric position affect the spread of covid?
+3. Can weather, geometric position affect the spread of covid?
 
 ```{r}
 
 ```
 
-### Question 4
-
-an even more in depth question, we've seen that population definitely affect how
-covid spread, let's check and see why social distancing is needed.
+4. Active cases plateau or dropped in some places, is it because of the vaccination?
 
 ```{r}
 
@@ -481,6 +507,9 @@ How did the R rate behave starting from the beginning of covid?
 ```{r}
 
 # pacman::p_unload(all)
+
+# one funny joke that I made when I was texting my friend
+# myLife <- me %>% hell()
 
 ```
 
