@@ -278,7 +278,7 @@ invisible(gc())
 
 4. Which country has the most active cases?
 Caution! This block generates GIF plot which will take more than 5 minutes to render.
-This block is disabled with `eval=FALSE`
+Auto run for this block is disabled with `eval=FALSE`, run it manually to force it.
 
 ```{r, warning=FALSE, eval=FALSE}
 
@@ -358,14 +358,21 @@ p <-
 animate(p, 200, fps = 24, duration = 120,width = 1280, height = 720, 
         renderer=gifski_renderer(paste0(gif_plot_path, "qa4.gif")))
 
-rm(p)
+rm(data, p)
 invisible(gc())
 
 ```
 
-5. What is the global map view of active cases starting from the beginning of the pandemic?
+Generated Images   
+(none using gganimate package) 
+
+Generated GIF   
+![](./Output/GIF/qa4.gif)
+
+
+5. How active cases evolve around the world?
 Caution! This block generates GIF plot which will take more than 5 minutes to render.
-This block is disabled with `eval=FALSE`
+Auto run for this block is disabled with `eval=FALSE`, run it manually to force it.
 
 ```{r, eval=FALSE, warning=FALSE}
 # 100 MB of images will be generated during the process
@@ -390,7 +397,7 @@ max_active_cases <- max(daily_covid$active_cases)
 min_active_cases <- min(daily_covid$active_cases)
 
 # output settings
-gif_name <- "qa5_map"
+gif_name <- "qa5"
 gif_frame_folder <- paste0(gif_plot_path, gif_name,"/")
 if (!file.exists(gif_frame_folder)) {
  dir.create(gif_frame_folder)
@@ -473,10 +480,12 @@ invisible(gc())
 ```
 
 Generated Images   
-715 images located in `./Output/InteractivePlot/qa5_map/`   
+715 images located in `./Output/InteractivePlot/qa5/`   
+
+> The reason that I'm not using gganimate here is simply because that I can't make it work with map data.
 
 Generated GIF   
-![](./Output/GIF/qa5_map.gif)   
+![](./Output/GIF/qa5.gif)   
 
 ## More in depth Questions
 

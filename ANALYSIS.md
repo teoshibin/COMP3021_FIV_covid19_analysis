@@ -9,37 +9,52 @@
 
 1. What is the overview of covid cases? 
 
-    ![Overview pie chart](./Output/StaticPlot/qa1_cases_proportion.png)
+    ![Overview pie chart](./Output/PNG/qa1.png)
+
 2. What is the scale of infected population in different continent or country? 
-    - [Interactive tree plot HTML](./Output/InteractivePlot/qa2_infection_scale.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/InteractivePlot/qa2_infection_scale.html)
 
-<p align="center">
-        <img src="./Output/StaticPlot/qa2_infection_scale_screenshot_1.png" width="100%"/>
+    - [Interactive tree plot HTML](./Output/HTML/qa2.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/HTML/qa2.html)
+
     <p align="center">
-        <img src="./Output/StaticPlot/qa2_infection_scale_screenshot_2.png" width="49%"/>
-        <img src="./Output/StaticPlot/qa2_infection_scale_screenshot_3.png" width="49%"/>
+            <img src="./Output/Screenshot/qa2_1.png" width="100%"/>
+        <p align="center">
+            <img src="./Output/Screenshot/qa2_2.png" width="49%"/>
+            <img src="./Output/Screenshot/qa2_3.png" width="49%"/>
+        </p>
     </p>
-</p>
 
-3. How many people suffered from covid?
-    - [Interactive area plot HTML](./Output/InteractivePlot/qa3_cumulative_cases_by_date.html) -  [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/InteractivePlot/qa3_cumulative_cases_by_date.html)
+3. How many people suffered from covid globally?
+
+    - [Interactive area plot HTML](./Output/HTML/qa3.html) -  [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/HTML/qa3.html)
     
-    ![Cumulative cases by date area plot](./Output/StaticPlot/qa3_cumulative_cases_by_date.png)
-4. temp
-    - [temp](./Output/StaticPlot/qa4_cases_proportion.png)
-5. How active cases evolve starting from the beginning?
+    ![Cumulative cases by date area plot](./Output/PNG/qa3.png)
+
+4. Which country has the most active cases?
     
-    ![Active Cases World Map GIF](./Output/InteractivePlot/qa5_map_08fps.gif)
+    ![Active Cases Bar Plot Ranking](./Output/GIF/qa4.gif)
+
+5. How active cases evolve around the world?
+    
+    ![Active Cases World Map GIF](./Output/GIF/qa5.gif)
+
 6. Is there any relation between population and Covid cases?   
 
-    - [Interactive bubble plot HTML](./Output/InteractivePlot/qb1_infection_population.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/InteractivePlot/qb1_infection_population.html)
+    - [Interactive bubble plot HTML](./Output/HTML/qb1.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/HTML/qb1.html)
 
-    ![Relation bubble plot](./Output/StaticPlot/qb1_infection_population.png)
+    ![Relation bubble plot](./Output/PNG/qb1.png)
+
 7. temp
-    - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
+
+    - [temp](./Output/PNG/qa5_cases_proportion.png)
+
 8. temp
-    - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
+
+    - [temp](./Output/PNG/qa5_cases_proportion.png)
+
 9. temp
-    - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
+
+    - [temp](./Output/PNG/qa5_cases_proportion.png)
+
 10. temp
-    - [temp](./Output/StaticPlot/qa5_cases_proportion.png)
+
+    - [temp](./Output/PNG/qa5_cases_proportion.png)
