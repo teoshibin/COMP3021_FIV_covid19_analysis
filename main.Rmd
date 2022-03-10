@@ -20,6 +20,7 @@ pacman::p_load(
     dplyr,      # data manipulation
     tidyr,      # data manipulation (gather etc.)
     ggplot2,    # ploting
+    gganimate,  # animating ggplot
     stringr,    # string formatting
     scales,     # plot scales and color etc. 
     viridis,    # color palette
@@ -276,32 +277,97 @@ invisible(gc())
 ```
 
 4. Which country has the most active cases?
+Caution! This block generates GIF plot which will take more than 5 minutes to render.
+This block is disabled with `eval=FALSE`
 
-```{r}
+```{r, warning=FALSE, eval=FALSE}
 
 # ranking of cases for the top n countries
-# data <- 
-#     daily_covid %>% 
-#     group_by(date) %>% # The * 1 makes it possible to have non-integer ranks while sliding
-#     mutate(
-#         rank = rank(-value),
-#         Value_rel = value/value[rank==1],
-#         Value_lbl = paste0(" ",round(value/1e9)))
-#     # group_by(country_name) %>%
-#     # filter(rank <=10) %>%
-#     # ungroup()
-# data
+data <-
+    daily_covid %>%
+    group_by(date) %>% # The * 1 makes it possible to have non-integer ranks while sliding
+    mutate(
+        rank = rank(-active_cases),
+        # relative_value = active_cases / active_cases[rank==1],
+        value_label =
+            ifelse(
+                active_cases >= 1e9,
+                paste0(" ", round(active_cases/1e9, 4)," B"),
+                ifelse(
+                    active_cases >= 1e6,
+                    paste0(" ", round(active_cases/1e6, 2), " M"),
+                    ifelse(
+                        active_cases >= 1e3,
+                        paste0(" ", round(active_cases/1e3, 1), " K"),
+                        paste0(" ", active_cases)
+                    )
+                )
+            )
+    ) %>%
+    group_by(country) %>%
+    filter(rank <=10) %>%
+    ungroup()
 
+# plot
+p <-
+    data %>%
+    ggplot(aes(rank, active_cases, fill = as.factor(country), color = as.factor(country))) +
+    # geom_col(width = 0.8, position="identity") +
+    geom_tile(aes(y = active_cases /2,
+                height = active_cases,
+                width = 0.9), alpha = 0.7, color = NA) +
+    geom_text(aes(y = 0, label = paste(country, " ")), 
+              vjust = 0.2, hjust = 1, size=6) +
+    geom_text(aes(y = active_cases, label = value_label, hjust = 0), 
+              size=6) + # value label
+    coord_flip(clip = "off", expand = FALSE) +
+    scale_x_reverse() +
+    guides(color = FALSE, fill = FALSE) +
+    theme(
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
+        plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+        plot.caption =element_text(size=12, hjust=0.5, face="italic", color="grey"),
+        plot.background=element_blank(),
+        plot.margin = margin(2, 6, 2, 8, "cm"))
 
-# rm(data)
+# aniamtion
+p <- 
+    p +
+    transition_states(date,36,8) +
+    view_follow(fixed_x = TRUE)  +
+    labs(title = 'Date : {closest_state}',
+       subtitle  =  "Top 10 Countries Covid 19 Active Cases",
+       caption  = "Covid 19 Dataset") +
+    enter_grow() +
+    exit_shrink() +
+    ease_aes('cubic-in-out')
+
+animate(p, 200, fps = 24, duration = 120,width = 1280, height = 720, 
+        renderer=gifski_renderer(paste0(gif_plot_path, "qa4.gif")))
+
+rm(p)
+invisible(gc())
 
 ```
 
-5. How did the number of active cases evolve starting from the beginning?
+5. What is the global map view of active cases starting from the beginning of the pandemic?
+Caution! This block generates GIF plot which will take more than 5 minutes to render.
+This block is disabled with `eval=FALSE`
 
 ```{r, eval=FALSE, warning=FALSE}
-# ALERT !!! THIS SECTION CREATES GIF PLOTS, IT REQUIRE ROUGHLY 5 MINUTES TO RUN
-# This block of code is disabled, remove eval=F to evaluate
 # 100 MB of images will be generated during the process
 # The final GIF is around 20MD with a resolution of 1920 x 1065, 8 fps
 
