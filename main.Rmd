@@ -254,7 +254,7 @@ ggsave(paste0(sttc_plot_path, "qa3_cumulative_cases_by_date.png"))
 itrt_q3 <- ggplotly(q3, tooltip = "text")
 saveWidget(itrt_q3, file = paste0(itrt_plot_path, "qa3_cumulative_cases_by_date.html"))
 
-q3
+# q3
 itrt_q3
 
 ```
@@ -272,13 +272,16 @@ Which country has the most cases?
 
 ## Question 5
 
-How active cases have changed starting from the beginning?
+How did the number of active cases evolve starting from the beginning?
 
 ```{r, eval=FALSE}
 # ALERT !!! THIS SECTION CREATES GIF PLOTS, IT REQUIRE ROUGHLY 5 MINUTES TO RUN
 # This block of code is disabled, remove eval=F to evaluate
 # 100 MB of images will be generated during the process
 # The final GIF is around 20MD with a resolution of 1920 x 1065, 8 fps
+
+# An extra standalone R script (./qa5.R) is available for this section
+# In case that it doesn't work in Rmarkdown
 
 # map, gif encoder, list sorting
 pacman::p_load(maps,gifski,gtools)
@@ -324,7 +327,6 @@ for (i in c(1:len_date_seq)) {
             barheight = 10,
             ticks = F
         )) +
-        # theme_light() +
         theme(
             plot.title = element_text(size=12),
             panel.background = element_rect(
@@ -371,9 +373,12 @@ Generated GIF
 ![](./Output/InteractivePlot/qa5_map_08fps.gif)   
 
 ## More in depth Questions
+
 ### Question 1
+
 We can easily tell from previous plots that most of the cases are from big countries. 
 Is there any relation between population and Covid cases?
+
 ```{r fig.align="center", fig.width = 12, fig.height = 6}
 
 # we can easily tell from previous plots that most of the cases are from big
@@ -429,21 +434,39 @@ q11
 itrt_q11
 
 ```
+
 ### Question 2
+
 Which country did well in this pandemic war?
+
 ```{r}
 
 ```
 
 ### Question 3
+
 can weather, geometric position affect the spread of covid?
 
+```{r}
+
+```
+
 ### Question 4
+
 an even more in depth question, we've seen that population definitely affect how
 covid spread, let's check and see why social distancing is needed.
 
+```{r}
+
+```
+
 ### Question 5
+
 How did the R rate behave starting from the beginning of covid?
+
+```{r}
+
+```
 
 # clean up
 ```{r}
