@@ -7,6 +7,8 @@
 
 # Analysis Questions & Answers
 
+> Note: Double clicking, clicking, draging etc. can be applied to interactive plots, legends of it can be clicked as well.
+
 1. What is the overview of covid cases? 
 
     ![Overview pie chart](./Output/PNG/qa1.png)
@@ -45,16 +47,10 @@
 
 7. temp
 
-    - [temp](./Output/PNG/qa5_cases_proportion.png)
+    1. [Top 5 daily new cases rank by variance HTML](./Output/HTML/qb2_a.html) - [Preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/Output/HTML/qb2_a.html)
+    
+        ![](./Output/Screenshot/qb2_a.png)
 
-8. temp
-
-    - [temp](./Output/PNG/qa5_cases_proportion.png)
-
-9. temp
-
-    - [temp](./Output/PNG/qa5_cases_proportion.png)
-
-10. temp
-
-    - [temp](./Output/PNG/qa5_cases_proportion.png)
+    2. Daily New Cases & Vaccinations Comparison    
+    
+        ![](./Output/PNG/qb2_b.png)

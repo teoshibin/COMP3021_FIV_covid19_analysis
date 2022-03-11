@@ -1,9 +1,7 @@
-# Instruction
-
-Starting from importing packages until data cleaning is essential.
-Remaining code blocks are independent of each other, can be ran individually.
-
 # Mandatory Setup
+
+All code block within this section is essential for the rest of the plotting sections.
+Remaining plotting code blocks are independent of each other, can be ran individually.
 
 ## Import Packages
 
@@ -17,17 +15,21 @@ pacman::p_load(
     pacman,     # package installer
     installr,   # software installer
     rio,        # data importing
-    dplyr,      # data manipulation
-    tidyr,      # data manipulation (gather etc.)
-    ggplot2,    # ploting
-    gganimate,  # animating ggplot
-    stringr,    # string formatting
-    scales,     # plot scales and color etc. 
-    viridis,    # color palette
-    hrbrthemes, # plot themes
     plotly,     # interactive plot
+    gganimate,  # animating ggplot
+    hrbrthemes, # plot themes
+    viridis,    # color palette
     treemap,    # tree plot
-    htmlwidgets # save interactive plot into html
+    htmlwidgets,# save interactive plot into html
+    scales,     # plot scales and color etc. 
+    egg,        # arrange multiple plots into one plot
+    gifski,     # GIF renderer
+    tidyr,      # data manipulation (gather etc.)
+    stringr,    # string formatting
+    maps,       # map dataset
+    gtools,     # sort functions etc.
+    dplyr,      # data manipulation
+    ggplot2     # plot
     )
 
 # This is needed if packages are giving errors for incompatible binary distribution
@@ -287,8 +289,9 @@ invisible(gc())
 ```
 
 4. Which country has the most active cases?
+
 Caution! This block generates GIF plot which will take more than 5 minutes to render.
-Auto run for this block is disabled with `eval=FALSE`, run it manually to force it.
+Auto run for this block is disabled with `eval=FALSE`, run it manually to enforce it.
 
 ```{r, warning=FALSE, eval=FALSE}
 
@@ -380,8 +383,9 @@ Generated GIF
 ![](./Output/GIF/qa4.gif)
 
 5. How active cases evolve around the world?
+
 Caution! This block generates GIF plot which will take more than 5 minutes to render.
-Auto run for this block is disabled with `eval=FALSE`, run it manually to force it.
+Auto run for this block is disabled with `eval=FALSE`, run it manually to enforce it.
 
 ```{r, eval=FALSE, warning=FALSE}
 # 100 MB of images will be generated during the process
@@ -389,9 +393,6 @@ Auto run for this block is disabled with `eval=FALSE`, run it manually to force 
 
 # An extra standalone R script (./qa5.R) is available for this section
 # In case that it doesn't work in Rmarkdown
-
-# map, gif encoder, list sorting
-pacman::p_load(maps,gifski,gtools)
 
 # map boarder data
 world <- map_data("world")
@@ -477,9 +478,6 @@ png_files <- mixedsort(sort(png_files))
 gifski(png_files, gif_file = paste0(gif_plot_path, gif_name,".gif"), 
        width = 1920, height = 1065, delay = 0.125)
 
-# clean up
-pacman::p_unload(maps,gifski,gtools)
-
 # remove variables as they are too memory intensive
 rm(world, date_seq, print_frequrency, len_date_seq, max_active_cases, 
    min_active_cases, current_date, date_daily_covid, mapdata, map,
@@ -502,7 +500,7 @@ Generated GIF
 
 This is derived from previous map, as I notice that most of the cases are from big countries. 
 
-```{r fig.align="center", fig.width = 12, fig.height = 7, eval=TRUE}
+```{r fig.align="center", fig.width = 10, fig.height = 6, eval=TRUE}
 
 # we can easily tell from previous plots that most of the cases are from big
 # countries. Now, I'm curious about the relation between population & Covid cases
@@ -560,8 +558,10 @@ rm(p, itrt_p)
 invisible(gc())
 
 ```
+- Double Click Legend to filter
+- Hover to view details
 
-2. How vaccination and social distancing rules affect the spread of covid?
+2. How vaccination affect the spread of covid?
 
 This derived from previous bar ranking chart, there are some huge spike for active cases in some country.
 Lets take a closer look using daily new cases.
@@ -580,18 +580,19 @@ high_variance_countries <-
 high_variance_countries
 
 ```
-As you can see that these are the countries that we saw present almost all the time in previous bar chart ranking animation.
+As you can see that most of these countries can be found in the previous top 10 bar chart ranking animation.
 
 Lets take an even closer look to their daily new cases.
 
-```{r}
+```{r, fig.height=6, fig.width=10}
+
 data <-
     daily_covid %>%
     filter(country %in% high_variance_countries$country) %>% 
     mutate(text = paste0("New Cases: ", comma(daily_new_cases), 
                          "\nCountry: ", country, "\nDate: ", date))
-# View(data)
-p <-
+
+p1 <-
     ggplot(data, aes(date, daily_new_cases, group = country, color = country, text = text)) +
     geom_line() +
     scale_x_date(date_labels = "%b %Y") +
@@ -604,69 +605,90 @@ p <-
     ylab("New Cases") +
     xlab("Date")
 
-pp <- 
-    ggplotly(p, tooltip = "text")
+p2 <- ggplotly(p1, tooltip = "text")
+saveWidget(p2, file = paste0(html_plot_path, "qb2_a.html"))
 
-pp
+p2
 
-```
-
-```{r, fig.height=6, fig.width=10, warning=FALSE}
-
-ppp <- p +
-    facet_wrap(~country) +
-    theme(legend.position="none")
-ppp
-    
+rm(high_variance_countries, data, p1, p2)
+invisible(gc())
 
 ```
+- Double Click Legend to filter
+- Hover to view details
 
-Now lets add daily vaccinated dataset to it.
+There's a huge spike in india, I wonder how this relates to vaccination number.
+Now lets join daily vaccinated dataset to it.
 
-```{r, fig.height=6, fig.width=10, warning=FALSE}
-
+```{r, warning=FALSE}
 
 data_vac <- select(daily_vac, date, country, daily_vaccinations)
 
 data <- daily_covid %>% 
-    filter(country %in% high_variance_countries$country) %>% 
-    mutate_at("country", str_replace, "UK", "England") %>% 
-    mutate_at("country", str_replace, "USA", "United States")
+    filter(country == "India")
+    # mutate_at("country", str_replace, "UK", "England") %>% 
+    # mutate_at("country", str_replace, "USA", "United States")
 
 data_vac <- 
-    left_join(data, data_vac, by = c("date", "country")) %>% 
-    mutate(text = paste0("New Vaccinations: ", comma(daily_vaccinations),
-                         "\nNew Cases: ", comma(daily_new_cases),
-                         "\nCountry: ", country, 
-                         "\nDate: ", date))
+    left_join(data, data_vac, by = c("date", "country"))
 
-p <- 
+p1 <- 
     ggplot(data_vac) +
-    geom_line(aes(date, daily_new_cases, group = country, color = country, text = text)) +
-    geom_line(aes(date, daily_vaccinations, group = country, text = text), na.rm = T) +
+    geom_line(aes(date, daily_new_cases), 
+              color="#eb9e34", size=1, alpha=0.9, linetype=1) +
+    # geom_line(aes(date, daily_vaccinations, group = country, text = text), na.rm = T) +
+    scale_x_date(date_labels = "%b %Y") +
+    scale_y_continuous(
+        labels = unit_format(unit = "M", scale = 1e-6)
+        # limits = c(0, 4 * 1e6), 
+        # oob = squish
+    ) +
+    theme_ipsum() +
+    scale_color_viridis(discrete = TRUE, begin = 0, end = 0.9, option = "H") +
+    # labs(color = "Country") +
+    ylab("New Cases") +
+    xlab("Date") +
+    theme(
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        plot.margin = unit(c(.2,1,.4,1),"cm")
+    )
+# p1
+
+p2 <- 
+    ggplot(data_vac) +
+    geom_line(aes(date, daily_vaccinations), 
+              color="#4287f5", size=1, alpha=0.8, linetype=1) +
     scale_x_date(date_labels = "%b %Y") +
     scale_y_continuous(
         labels = unit_format(unit = "M", scale = 1e-6)
     ) +
     theme_ipsum() +
     scale_color_viridis(discrete = TRUE, begin = 0, end = 0.9, option = "H") +
-    labs(color = "Country") +
-    ylab("New Cases") +
+    ylab("New Vaccinations") +
     xlab("Date") +
-    facet_wrap(~country) +
-    theme(legend.position="none")
-p
+    ggtitle(label = "Daily New Cases & Vaccinations in India") +
+    theme(
+        plot.title = element_text(size = 12),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title.y = element_text(size = 10),
+        plot.margin = unit(c(.4,1,.2,1),"cm")
+    )
+# p2
+
+p3 <- ggarrange(p2, p1, heights = c(0.4, 0.6))
+ggsave(paste0(png_plot_path, "qb2_b.png"), plot = p3, width = 1920, height=1080 , units = "px")
+
+rm(data_vac, data, p1, p2, p3)
+invisible(gc())
 
 ```
 
-
-# clean up
+# Clean up
 ```{r}
 
-# pacman::p_unload(all)
-
-# one funny joke that I made when I was texting my friend
-# myLife <- me %>% hell()
+pacman::p_unload(all)
 
 ```
 
