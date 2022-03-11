@@ -13,4 +13,31 @@ Covid19 dataset visualization using R. Generated charts, interactive html charts
 
 ## Complete R Implementation
 - [R markdown HTML](./main.html) - [preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/main.html)
-- [R mardown PDF](#)
+- [R mardown PDF (Less Interactive)](#)
+
+## Folder Structure
+
+```
+.
+└── covid19_analysis/
+    ├── Data/
+    ├── Function/
+    ├── Output/
+    │   ├── HTML/
+    │   ├── GIF/
+    │   ├── PNG/
+    │   └── Screenshot/
+    ├── covid19_analysis.Rproj
+    ├── main.Rmd
+    ├── ANALYSIS.md
+    ├── README.md
+    └── ...
+```
+
+`Data` Input dataset   
+`Function` Auxiliary functions   
+`Output` Contains different type of generated outputs   
+`covid19_analysis.Rproj` Main R project file   
+`main.Rmd` Main markdown script   
+`ANALYSIS.md` Quick presentation of all generated outputs   
+`README.md` Read me   
