@@ -508,7 +508,7 @@ This is derived from previous map, as I notice that most of the cases are from b
 p <- summary_covid %>%
     
     # Reorder countries to having big bubbles at the back
-    arrange(desc(population)) %>%
+    arrange(desc(total_tests)) %>%
     
     # prepare text for tooltip
     mutate(text = 
