@@ -1,3 +1,4 @@
+
 # Mandatory Setup
 
 All code block within this section is essential for the rest of the plotting sections.
@@ -29,7 +30,7 @@ pacman::p_load(
     maps,       # map dataset
     gtools,     # sort functions etc.
     dplyr,      # data manipulation
-    ggplot2     # plot
+    ggplot2    # plot
     )
 
 # This is needed if packages are giving errors for incompatible binary distribution
@@ -37,9 +38,6 @@ pacman::p_load(
 
 devtools::install_github("timelyportfolio/d3treeR")
 library(d3treeR) # interactive tree plot
-
-# load custom functions
-source("./functions/general_functions.R")
 
 ```
 
