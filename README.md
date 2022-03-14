@@ -45,3 +45,6 @@ Covid19 dataset visualization using R. Generated charts, interactive html charts
 
 ### Notebook
 - [R markdown HTML](./main.html) - [preview](http://htmlpreview.github.io/?https://github.com/teoshibin/COMP3021_FIV_covid19_analysis/blob/main/main.html)
+
+# License
+Licensed under the [MIT License](./LICENSE.md).
